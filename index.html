@@ -93,14 +93,29 @@
         return;
       }
 
-      
 
 const oldListHtml = listElement.innerHTML;
+
+let currentDate = new Date();
+const formatDate = (dateObject) => {
+    let minutes = dateObject.getMinutes();
+    let months = dateObject.getMonth() + 1;
+    let years = dateObject.getFullYear() - 2000;
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    if (months < 10) {
+      months = "0" + months;
+    }
+    const outDate = dateObject.getDate() + '.' + months + '.' + years + '  ' + dateObject.getHours() + ':' + minutes;
+    return outDate;
+  }
+
 listElement.innerHTML = oldListHtml +
          `<li  class="comment">
           <div class="comment-header">
             <div>${nameInputElement.value}</div>
-            <div>${Date()}</div>
+            <div>${formatDate(currentDate)}</div>
           </div>
           <div class="comment-body">
             <div class="comment-text">
