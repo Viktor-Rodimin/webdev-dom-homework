@@ -9,7 +9,7 @@
   <body>
     <div class="container">
       <ul id="list" class="comments">
-        <li  class="comment">
+        <li  class="comment" data-comment="">
           <div class="comment-header">
             <div>Глеб Фокин</div>
             <div>12.02.22 12:18</div>
@@ -22,11 +22,11 @@
           <div class="comment-footer">
             <div class="likes">
               <span class="likes-counter">3</span>
-              <button class="like-button"></button>
+              <button id="like-push" class="like-button"></button>
             </div>
           </div>
         </li>
-        <li  class="comment">
+        <li  class="comment" data-comment="">
           <div class="comment-header">
             <div> Варвара Н.</div>
             <div>13.02.22 19:22</div>
@@ -76,8 +76,9 @@
     const listElement = document.getElementById('list');
     const nameInputElement = document.getElementById('name-input');
     const textInputElement = document.getElementById('text-input');
-    
-    
+    const commentElements = document.querySelectorAll('.comment');
+
+
 
     buttonElement.addEventListener('click', () => {
 
@@ -129,7 +130,62 @@ listElement.innerHTML = oldListHtml +
             </div>
           </div>
         </li>`
-    })
+        const likeButtons = document.querySelectorAll('.like-button');
+      for (const likeButton of likeButtons) {
+        likeButton.addEventListener('click', () => {
+          const likesCounterElement = likeButton.previousElementSibling;
+          const likesCounter = parseInt(likesCounterElement.textContent);
+          if (likeButton.classList.contains('-active-like')) {
+            likeButton.classList.remove('-active-like');
+            likesCounterElement.textContent = likesCounter - 1;
+          } else {
+            likeButton.classList.add('-active-like');
+            likesCounterElement.textContent = likesCounter + 1;
+          }
+        })
+      }
+      const comments = [
+  {
+    nameElement: 'Глеб Фокин',
+    commentElement: 'Это будет первый комментарий на этой странице',
+    timeElement: '12.02.22 12:18',
+    likesElement: false,
+    likesCounter: 3
+  },
+  {
+    nameElement: 'Варвара Н.',
+    commentElement: 'Мне нравится как оформлена эта страница! ❤',
+    timeElement: '13.02.22 19:22',
+    likesElement: true,
+    likesCounter: 75
+  }
+]
+const renderComments = () => {
+  const commentsHtml = comments.map((comment) => {
+    return `<li  class="comment">
+          <div class="comment-header">
+            <div>${nameElement.comment}</div>
+            <div>${timeElement.comment}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text">
+              ${textInputElement}
+            </div>
+          </div>
+          <div class="comment-footer">
+            <div class="likes">${likesCounter}
+              <span class="likes-counter">${likesCounter}0</span>
+              <button class="like-button"></button>
+            </div>
+          </div>
+        </li>`
+  }).join('');
+};
+renderComments();
+return(commentsHtml);
+
+    });
+    commentElements.innerHTML = renderComments();
     // Код писать здесь
     console.log("It works!");
   </script>
