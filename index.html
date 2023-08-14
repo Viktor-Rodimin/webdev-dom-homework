@@ -45,11 +45,6 @@
     const textInputElement = document.getElementById('text-input');
     const commentElements = document.querySelectorAll(".comment"); 
     
-    
-
-   
-    
-    
 
     const comments = [ 
       { 
@@ -69,18 +64,26 @@
         isEdit: false 
       }, 
     ]; 
-
+    const replyToComment = () => {
+        const commentTextElements = document.querySelectorAll('.comment-text');
+        for (const commentTextElement of commentTextElements) {
+          commentTextElement.addEventListener('click', () => {
+                const index = commentTextElement.dataset.index;
+                console.log (index);
+                const quote = `/Начало цитаты/${comments[index].name}:\n ${comments[index].text}/конец цитаты/ \n`;
+                textInputElement.value = quote.replace("<div class='quote'>", '').replace('</div>', '');
+            })
+        }
+    }
     const renderComments = () => {
      const commentsHtml = comments.map((comment,index) => {
-        return `<li  class="comment" data-index="${index}" data-likes="${comment.likesCounter}">
+        return `<li  class="comment" data-index="${index}" data-likes="${comment.likesCounter}"data-text="${comment.text}">
           <div class="comment-header">
             <div>${comment.name}</div>
             <div>${comment.date}</div>
           </div>
           <div class="comment-body">
-            <div class="comment-text">
-              ${comment.text}
-            </div>
+            <div class="comment-text" data-index="${index}">${comment.text}</div>
           </div>
           <div class="comment-footer">
             <div class="likesBox">
@@ -91,15 +94,13 @@
         </li>`
       }).join('');
       listElement.innerHTML = commentsHtml;
-      
+      // добавим вызов функции ответа repiyTocomment()
+      replyToComment();
     }
    
     renderComments ();
    
-
-
     buttonElement.addEventListener('click', () => {
-
       nameInputElement.classList.remove('error');
       if (nameInputElement.value === '') {
         nameInputElement.classList.add('error');
@@ -111,9 +112,6 @@
         textInputElement.classList.add('error');
         return;
       }
-
-
-
 
 
 let currentDate = new Date();
@@ -131,8 +129,16 @@ const formatDate = (dateObject) => {
     return outDate;
   }
   comments.push({
-            name: nameInputElement.value,
-            text: textInputElement.value,
+            name: nameInputElement.value.replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;"),
+            text: textInputElement.value.replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;")
+            .replaceAll('/Начало цитаты/', "<div class='quote'>")
+            .replaceAll('/конец цитаты/', '</div>'),
             date: formatDate(currentDate),
 
             likesCounter: 0,
@@ -150,9 +156,10 @@ const formatDate = (dateObject) => {
     
 listElement.addEventListener("click", (event) => {
  const eventTarget=event.target
- if(eventTarget.classList.contains("like-button")){
+ if(eventTarget.classList.contains("like-button","comment-text")){
   const index = parseInt(eventTarget.closest('.comment').dataset.index)
   const likes = parseInt(eventTarget.closest('.comment').dataset.likes)
+  // const text = parseInt(eventTarget.closest('.comment').dataset.text)
   const isLiked = comments[index].isLiked
   if (isLiked){
     comments[index].likesCounter=likes-1
@@ -161,14 +168,16 @@ listElement.addEventListener("click", (event) => {
     comments[index].likesCounter=likes+1
   }
   comments[index].isLiked=!isLiked
+
   renderComments();
+
  }
  
 }) 
 
 
+   
   
-   
-   
+
   </script>
 </html>
