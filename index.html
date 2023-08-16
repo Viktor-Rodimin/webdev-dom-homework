@@ -43,29 +43,57 @@
     const listElement = document.getElementById('list');
     const nameInputElement = document.getElementById('name-input');
     const textInputElement = document.getElementById('text-input');
-    const commentElements = document.querySelectorAll(".comment"); 
-    
+    const commentElements = document.querySelectorAll(".container"); 
 
-    const comments = [ 
-      { 
-        name:"Глеб Фокин", 
-        text: "Это будет первый комментарий на этой странице",  
-        date: "12.02.22 12:18", 
-        likesCounter:"3", 
-        isLiked : false,
-        isEdit: false
-      }, 
-      { 
-        name:"Варвара Н.", 
-        text: "Мне нравится как оформлена эта страница! ❤",  
-        date: "13.02.22 19:22", 
-        likesCounter:"75", 
-        isLiked : false,
-        isEdit: false 
-      }, 
-    ]; 
+    function currentDate(date) {
+    let dateZero = date.getDate(),
+      monthsZero = date.getMonth(),
+      hour = date.getHours(),
+      minute = date.getMinutes();
+    if (hour < 10) {
+      hour = '0' + hour;
+    }
+    if (minute < 10) {
+      minute = '0' + minute;
+    }
+    if (monthsZero < 10) {
+      monthsZero = '0' + (monthsZero + 1);
+    }
+    if (dateZero < 10) {
+      dateZero = '0' + dateZero;
+    }
+    return `${dateZero}.${monthsZero}.${date.getFullYear().toString().substr(-2)} ${hour}:${minute}`;
+  }
+
+ 
+
+    let comments = []; 
+
+
+                  const fethPromise = fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",
+                  {
+                    method: "GET",
+                  });  
+                  fethPromise.then((response) => {
+                  const jsonPromise = response.json();
+                  jsonPromise.then((responseData) => {
+                  console.log(responseData);
+                  comments =  responseData.comments.map((comment) => {
+                  return{
+                  name: comment.author.name,
+                  date: currentDate(new Date(comment.date)),
+                  text: comment.text,
+                  likesCounter: comment.likes,
+                  isLiked: comment.isLiked,
+                      }
+                    })
+                    renderComments();
+                  })
+                 
+                  })
+
     const replyToComment = () => {
-        const commentTextElements = document.querySelectorAll('.comment-text');
+        const commentTextElements = document.querySelectorAll('.comment');
         for (const commentTextElement of commentTextElements) {
           commentTextElement.addEventListener('click', () => {
                 const index = commentTextElement.dataset.index;
@@ -76,6 +104,7 @@
         }
     }
     const renderComments = () => {
+      console.log(comments)
      const commentsHtml = comments.map((comment,index) => {
         return `<li  class="comment" data-index="${index}" data-likes="${comment.likesCounter}"data-text="${comment.text}">
           <div class="comment-header">
@@ -94,11 +123,10 @@
         </li>`
       }).join('');
       listElement.innerHTML = commentsHtml;
-      // добавим вызов функции ответа repiyTocomment()
       replyToComment();
     }
    
-    renderComments ();
+    
    
     buttonElement.addEventListener('click', () => {
       nameInputElement.classList.remove('error');
@@ -114,41 +142,45 @@
       }
 
 
-let currentDate = new Date();
-const formatDate = (dateObject) => {
-    let minutes = dateObject.getMinutes();
-    let months = dateObject.getMonth() + 1;
-    let years = dateObject.getFullYear() - 2000;
-    if (minutes < 10) {
-      minutes = "0" + minutes;
-    }
-    if (months < 10) {
-      months = "0" + months;
-    }
-    const outDate = dateObject.getDate() + '.' + months + '.' + years + '  ' + dateObject.getHours() + ':' + minutes;
-    return outDate;
-  }
-  comments.push({
-            name: nameInputElement.value.replaceAll("<","&lt;")
+fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",{
+  method: "POST",
+  body: JSON.stringify({
+    text: textInputElement.value
+            .replaceAll("<","&lt;")
             .replaceAll(">","&gt;")
             .replaceAll("&", "&amp;")
             .replaceAll('"', "&quot;"),
-            text: textInputElement.value.replaceAll("<","&lt;")
+    name: nameInputElement.value
+            .replaceAll("<","&lt;")
             .replaceAll(">","&gt;")
             .replaceAll("&", "&amp;")
             .replaceAll('"', "&quot;")
             .replaceAll('/Начало цитаты/', "<div class='quote'>")
             .replaceAll('/конец цитаты/', '</div>'),
-            date: formatDate(currentDate),
-
-            likesCounter: 0,
-            isLiked : false,
-            isEdit: false 
-        });
-
-          renderComments();
-
-        
+    date: (comment.date)
+  })
+}).then(() => {const fethPromise = fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",
+                  {
+                    method: "GET",
+                  });  
+                  fethPromise.then((response) => {
+                  const jsonPromise = response.json();
+                  jsonPromise.then((responseData) => {
+                  console.log(responseData);
+                  comments =  responseData.comments.map((comment) => {
+                  return{
+                  name: comment.author.name,
+                  date: currentDate(new Date(comment.date)),
+                  text: comment.text,
+                  likesCounter: comment.likes,
+                  isLiked: comment.isLiked,
+                      }
+                    })
+                    renderComments();
+                  })
+                 
+                  })})
+      
         nameInputElement.value = "";
         textInputElement.value = "";
         
@@ -174,10 +206,6 @@ listElement.addEventListener("click", (event) => {
  }
  
 }) 
-
-
-   
-  
 
   </script>
 </html>
