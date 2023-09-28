@@ -43,9 +43,7 @@
     const listElement = document.getElementById('list');
     const nameInputElement = document.getElementById('name-input');
     const textInputElement = document.getElementById('text-input');
-    // const commentTextElements = document.querySelectorAll(".comment"); 
-    
-
+  
     function currentDate(date) {
     let dateZero = date.getDate(),
       monthsZero = date.getMonth(),
@@ -65,8 +63,6 @@
     }
     return `${dateZero}.${monthsZero}.${date.getFullYear().toString().substr(-2)} ${hour}:${minute}`;
   }
-
- 
 
     let comments = []; 
 
@@ -93,40 +89,13 @@
                  
                   })
 
-                //   fethPromise = fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",
-                //   {
-                //     method: "GET",
-                //   });  
-                //   fethPromise.then((response) => {
-                //   return response.json()
-                // })
-                //   .then((responseData) => {
-                //     return responseData()
-                //     comments =  responseData.comments.map((comment) => {
-                //   return{
-                //   name: comment.author.name,
-                //   date: currentDate(new Date(comment.date)),
-                //   text: comment.text,
-                //   likesCounter: comment.likes,
-                //   isLiked: comment.isLiked,
-                //       }
-                //     })
-                //     renderComments();
-                  
-                //   })
-                  
- 
-                   
-                 
         const getComments = () => {
           return    fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",{
                     method: "GET",
-                   
-})
+                  })
                   .then((response) => {
                     return response.json();
                   })
-
                   .then((responseData) => { 
                     comments =  responseData.comments.map((comment) => {
                   return{
@@ -140,17 +109,14 @@
                   buttonElement.disabled = false;
                     buttonElement.textContent = 'Написать';
                     nameInputElement.value = "";
-        textInputElement.value = "";
-        renderComments();
-                });
-                    // buttonElement.disabled = false;
-                    // buttonElement.textContent = 'Написать';
-                    // renderComments();
-
-  
+                    textInputElement.value = "";
+                    renderComments();
+                })
+                
+                
+                        
     };
               
-
     const replyToComment = () => {
         const commentTextElements = document.querySelectorAll('.comment');
         for (const commentTextElement of commentTextElements) {
@@ -185,8 +151,6 @@
       replyToComment();
     }
    
-    
-   
     buttonElement.addEventListener('click', () => {
       nameInputElement.classList.remove('error');
       if (nameInputElement.value === '') {
@@ -199,59 +163,10 @@
         textInputElement.classList.add('error');
         return;
       }
-
-
       buttonElement.disabled = true;
       buttonElement.textContent = 'Элемент добавляется .....';
     
-// fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",{
-//   method: "POST",
-//   body: JSON.stringify({
-//     text: textInputElement.value
-//             .replaceAll("<","&lt;")
-//             .replaceAll(">","&gt;")
-//             .replaceAll("&", "&amp;")
-//             .replaceAll('"', "&quot;"),
-//     name: nameInputElement.value
-//             .replaceAll("<","&lt;")
-//             .replaceAll(">","&gt;")
-//             .replaceAll("&", "&amp;")
-//             .replaceAll('"', "&quot;")
-//             .replaceAll('/Начало цитаты/', "<div class='quote'>")
-//             .replaceAll('/конец цитаты/', '</div>'),
-  
-//   })
-// })
-// .then(() => { fethPromise = fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",
-//                   {
-//                     method: "GET",
-//                   });  
-//                   fethPromise.then((response) => {
-//                   jsonPromise = response.json();
-//                   jsonPromise.then((responseData) => {
-//                   console.log(responseData);
-//                   comments =  responseData.comments.map((comment) => {
-//                   return{
-//                   name: comment.author.name,
-//                   date: currentDate(new Date(comment.date)),
-//                   text: comment.text,
-//                   likesCounter: comment.likes,
-//                   isLiked: comment.isLiked,
-//                       }
-//                     })
-//                     buttonElement.disabled = false;
-//                     buttonElement.textContent = 'Написать';
-//                     renderComments();
-//                   })
-                 
-//                   })})
-      
-//         nameInputElement.value = "";
-//         textInputElement.value = "";
-        
-//     });
-
-    fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",{
+    fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments/",{
   method: "POST",
   body: JSON.stringify({
     text: textInputElement.value
@@ -259,6 +174,7 @@
             .replaceAll(">","&gt;")
             .replaceAll("&", "&amp;")
             .replaceAll('"', "&quot;"),
+            forceError:true,
     name: nameInputElement.value
             .replaceAll("<","&lt;")
             .replaceAll(">","&gt;")
@@ -266,17 +182,28 @@
             .replaceAll('"', "&quot;")
             .replaceAll('/Начало цитаты/', "<div class='quote'>")
             .replaceAll('/конец цитаты/', '</div>'),
-  
-  })
-  
+            forceError:true,
+  }) 
 })
 .then((response) => {
+  if (response.status === 201) {
   return response.json();
+}
+else  {
+  throw new Error ('Сервер упал');
+}
+
 })
 
 .then((responseData) => { 
 return getComments();
   })
+  .catch((error) => {
+                  buttonElement.disabled = false;
+                    buttonElement.textContent = 'Написать';
+                    alert ('Что-то пошло не так');
+                    console.warn(error);
+                })
   
  }) // Счетчик лайков
 listElement.addEventListener("click", (event) => {
