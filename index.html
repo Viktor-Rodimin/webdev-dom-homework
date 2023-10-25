@@ -174,7 +174,7 @@
             .replaceAll(">","&gt;")
             .replaceAll("&", "&amp;")
             .replaceAll('"', "&quot;"),
-            forceError:true,
+             forceError:true,
     name: nameInputElement.value
             .replaceAll("<","&lt;")
             .replaceAll(">","&gt;")
@@ -182,16 +182,22 @@
             .replaceAll('"', "&quot;")
             .replaceAll('/Начало цитаты/', "<div class='quote'>")
             .replaceAll('/конец цитаты/', '</div>'),
-            forceError:true,
+             forceError:true,
   }) 
 })
 .then((response) => {
-  if (response.status === 201) {
-  return response.json();
-}
-else  {
-  throw new Error ('Сервер упал');
-}
+  if (response.status === 400) {
+           alert ('Недостаточно символов.Введите коментарий и имя не менее 4 символов.');
+
+         throw new Error('НЕДОСТАТОЧНО СИМВОЛОВ!');
+       }
+
+
+         if (response.status === 500) {
+           alert ('ПРОИЗОШЛА ОШИБКА СЕРВЕРА,ПОПРОБУЙТЕ ПОЗЖЕ!');
+
+         throw new Error('ПРОИЗОШЛА ОШИБКА СЕРВЕРА,ПОПРОБУЙТЕ ПОЗЖЕ!'); 
+         } 
 
 })
 
@@ -201,7 +207,7 @@ return getComments();
   .catch((error) => {
                   buttonElement.disabled = false;
                     buttonElement.textContent = 'Написать';
-                    alert ('Что-то пошло не так');
+                    alert ('Что то пошло не так ,повторите запрос позже');
                     console.warn(error);
                 })
   
