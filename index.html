@@ -8,64 +8,230 @@
 
   <body>
     <div class="container">
-      <ul class="comments">
-        <li class="comment">
-          <div class="comment-header">
-            <div>Глеб Фокин</div>
-            <div>12.02.22 12:18</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Это будет первый комментарий на этой странице
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">3</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>
-        <li class="comment">
-          <div class="comment-header">
-            <div>Варвара Н.</div>
-            <div>13.02.22 19:22</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Мне нравится как оформлена эта страница! ❤
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">75</span>
-              <button class="like-button -active-like"></button>
-            </div>
-          </div>
-        </li>
+      <ul id="list" class="comments">
+<!-- Рендерится из JS -->
       </ul>
-      <div class="add-form">
-        <input
+      <div  class="add-form">
+        <input id="name-input"
           type="text"
           class="add-form-name"
           placeholder="Введите ваше имя"
+          value=""
         />
-        <textarea
+        <textarea id="text-input"
           type="textarea"
           class="add-form-text"
           placeholder="Введите ваш коментарий"
           rows="4"
+          value=""
         ></textarea>
         <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+          <button id="add-button" class="add-form-button">Написать</button>
         </div>
       </div>
     </div>
   </body>
+  <style>
+    .error {
+      background-color: red;
+    }
+  </style>
 
   <script>
-    "use strict";
-    // Код писать здесь
-    console.log("It works!");
+
+    const buttonElement = document.getElementById('add-button');
+    const listElement = document.getElementById('list');
+    const nameInputElement = document.getElementById('name-input');
+    const textInputElement = document.getElementById('text-input');
+  
+    function currentDate(date) {
+    let dateZero = date.getDate(),
+      monthsZero = date.getMonth(),
+      hour = date.getHours(),
+      minute = date.getMinutes();
+    if (hour < 10) {
+      hour = '0' + hour;
+    }
+    if (minute < 10) {
+      minute = '0' + minute;
+    }
+    if (monthsZero < 10) {
+      monthsZero = '0' + (monthsZero + 1);
+    }
+    if (dateZero < 10) {
+      dateZero = '0' + dateZero;
+    }
+    return `${dateZero}.${monthsZero}.${date.getFullYear().toString().substr(-2)} ${hour}:${minute}`;
+  }
+
+    let comments = []; 
+
+
+                  fethPromise = fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",
+                  {
+                    method: "GET",
+                  });  
+                  fethPromise.then((response) => {
+                  jsonPromise = response.json();
+                  jsonPromise.then((responseData) => {
+                  console.log(responseData);
+                  comments =  responseData.comments.map((comment) => {
+                  return{
+                  name: comment.author.name,
+                  date: currentDate(new Date(comment.date)),
+                  text: comment.text,
+                  likesCounter: comment.likes,
+                  isLiked: comment.isLiked,
+                      }
+                    })
+                    renderComments();
+                  })
+                 
+                  })
+
+        const getComments = () => {
+          return    fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments",{
+                    method: "GET",
+                  })
+                  .then((response) => {
+                    return response.json();
+                  })
+                  .then((responseData) => { 
+                    comments =  responseData.comments.map((comment) => {
+                  return{
+                  name: comment.author.name,
+                  date: currentDate(new Date(comment.date)),
+                  text: comment.text,
+                  likesCounter: comment.likes,
+                  isLiked: comment.isLiked,
+                      }
+                  })
+                  buttonElement.disabled = false;
+                    buttonElement.textContent = 'Написать';
+                    nameInputElement.value = "";
+                    textInputElement.value = "";
+                    renderComments();
+                })
+                
+                
+                        
+    };
+              
+    const replyToComment = () => {
+        const commentTextElements = document.querySelectorAll('.comment');
+        for (const commentTextElement of commentTextElements) {
+          commentTextElement.addEventListener('click', () => {
+                const index = commentTextElement.dataset.index;
+                // console.log (index);
+                const quote = `/Начало цитаты/${comments[index].name}:\n ${comments[index].text}/конец цитаты/ \n`;
+                textInputElement.value = quote.replace("<div class='quote'>", '').replace('</div>', '');
+            })
+        }
+    }
+    const renderComments = () => {
+      console.log(comments)
+     const commentsHtml = comments.map((comment,index) => {
+        return `<li  class="comment" data-index="${index}" data-likes="${comment.likesCounter}"data-text="${comment.text}">
+          <div class="comment-header">
+            <div>${comment.name}</div>
+            <div>${comment.date}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text" data-index="${index}">${comment.text}</div>
+          </div>
+          <div class="comment-footer">
+            <div class="likesBox">
+              <span class="likes-counter">${comment.likesCounter}</span>
+              <button class="like-button ${comment.isLiked ? '-active-like' : ''}"></button>
+            </div>
+          </div>
+        </li>`
+      }).join('');
+      listElement.innerHTML = commentsHtml;
+      replyToComment();
+    }
+   
+    buttonElement.addEventListener('click', () => {
+      nameInputElement.classList.remove('error');
+      if (nameInputElement.value === '') {
+        nameInputElement.classList.add('error');
+        return;
+      }
+
+      textInputElement.classList.remove('error');
+      if (textInputElement.value === '') {
+        textInputElement.classList.add('error');
+        return;
+      }
+      buttonElement.disabled = true;
+      buttonElement.textContent = 'Элемент добавляется .....';
+    
+    fetch("https://wedev-api.sky.pro/api/v1/Viktor-Rodimin/comments/",{
+  method: "POST",
+  body: JSON.stringify({
+    text: textInputElement.value
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;"),
+             forceError:true,
+    name: nameInputElement.value
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;")
+            .replaceAll('/Начало цитаты/', "<div class='quote'>")
+            .replaceAll('/конец цитаты/', '</div>'),
+             forceError:true,
+  }) 
+})
+.then((response) => {
+  if (response.status === 400) {
+           alert ('Недостаточно символов.Введите коментарий и имя не менее 4 символов.');
+
+         throw new Error('НЕДОСТАТОЧНО СИМВОЛОВ!');
+       }
+
+
+         if (response.status === 500) {
+           alert ('ПРОИЗОШЛА ОШИБКА СЕРВЕРА,ПОПРОБУЙТЕ ПОЗЖЕ!');
+
+         throw new Error('ПРОИЗОШЛА ОШИБКА СЕРВЕРА,ПОПРОБУЙТЕ ПОЗЖЕ!'); 
+         } 
+
+})
+
+.then((responseData) => { 
+return getComments();
+  })
+  .catch((error) => {
+                  buttonElement.disabled = false;
+                    buttonElement.textContent = 'Написать';
+                    alert ('Что то пошло не так ,повторите запрос позже');
+                    console.warn(error);
+                })
+  
+ }) // Счетчик лайков
+listElement.addEventListener("click", (event) => {
+ const eventTarget=event.target
+ if(eventTarget.classList.contains("like-button","comment-text")){
+  const index = parseInt(eventTarget.closest('.comment').dataset.index)
+  const likes = parseInt(eventTarget.closest('.comment').dataset.likes)
+  // const text = parseInt(eventTarget.closest('.comment').dataset.text)
+  const isLiked = comments[index].isLiked
+  if (isLiked){
+    comments[index].likesCounter=likes-1
+  }
+  else{
+    comments[index].likesCounter=likes+1
+  }
+  comments[index].isLiked=!isLiked
+
+  renderComments();
+
+ }
+ 
+}) 
+
   </script>
 </html>
